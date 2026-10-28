@@ -170,7 +170,7 @@ function check(name, cond, extra) {
   const idx4 = loadPage('pages/index/index.js')
   idx4.onLoad()
   await tick(50)
-  check('店铺信息带电话/地址', idx4.data.shop.phone === '18348259989' && !!idx4.data.shop.address)
+  check('店铺信息带电话/地址', idx4.data.shop.phone === '13800000000' && !!idx4.data.shop.address)
   idx4.onShopInfo()
   check('点店名打开资料弹层', idx4.data.shopOpen === true)
   idx4.onCall()
