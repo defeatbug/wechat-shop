@@ -32,7 +32,8 @@ Page({
     editing: false,
     form: {},
     ready: false,
-    denied: false
+    denied: false,
+    myOpenid: ''
   },
 
   onLoad() {
@@ -48,12 +49,18 @@ Page({
         this.refresh()
         return
       }
-      this.setData({ denied: true })
+      // 把访问者自己的 openid 显示出来，方便店主把它加进 ADMIN_OPENIDS
+      this.setData({ denied: true, myOpenid: r.openid || '' })
     })
   },
 
   onShow() {
     if (this.data.ready) this.refresh()
+  },
+
+  onCopyOpenid() {
+    if (!this.data.myOpenid) return
+    wx.setClipboardData({ data: this.data.myOpenid })
   },
 
   onExitAdmin() {

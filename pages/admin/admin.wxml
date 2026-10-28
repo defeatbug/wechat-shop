@@ -3,6 +3,10 @@
     <view class="denied-ico">🔒</view>
     <view class="denied-t">没有访问权限</view>
     <view class="denied-d">店主后台仅管理员可用。请用店主微信打开；本地演示模式需要输入管理密码。</view>
+    <view class="denied-openid" wx:if="{{myOpenid}}" bindtap="onCopyOpenid">
+      <view class="denied-openid-t">你的 openid（点一下复制）</view>
+      <view class="denied-openid-v">{{myOpenid}}</view>
+    </view>
     <view class="denied-btn" bindtap="onExitAdmin">返回</view>
   </view>
 
