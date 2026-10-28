@@ -40,7 +40,12 @@ const products = [
 
 const shop = {
   name: '喜欢温柔',
-  notice: '选好款提交即可，免配送费；提交后店主会联系你确认，线下付款。'
+  avatar: '🐻',
+  notice: '选好款提交即可，免配送费；提交后店主会联系你确认，线下付款。',
+  phone: '18348259989',
+  address: '盛世新天地10号楼106商铺 喜欢温柔集合店',
+  hours: '每天 10:00 - 21:30',
+  wechat: '微信同号，可私信'
 }
 
 module.exports = { categories, products, shop }

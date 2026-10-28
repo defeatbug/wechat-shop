@@ -17,6 +17,9 @@ global.wx = {
   redirectTo: o => console.log('   [redirect]', o.url),
   reLaunch: o => console.log('   [relaunch]', o.url),
   vibrateShort: () => {},
+  makePhoneCall: o => console.log('   [call]', o.phoneNumber),
+  setClipboardData: o => console.log('   [clipboard]', o.data),
+  navigateBack: o => console.log('   [back]', JSON.stringify(o || {})),
   createSelectorQuery: () => {
     const q = {
       in: () => q,
@@ -162,6 +165,37 @@ function check(name, cond, extra) {
   idx3.onLoad()
   await tick(50)
   check('首页不出现已删除商品', !idx3.data.groups.some(g => g.products.some(p => p.name === '测试耳夹')))
+
+  console.log('=== 8. 店铺资料弹层 ===')
+  const idx4 = loadPage('pages/index/index.js')
+  idx4.onLoad()
+  await tick(50)
+  check('店铺信息带电话/地址', idx4.data.shop.phone === '18348259989' && !!idx4.data.shop.address)
+  idx4.onShopInfo()
+  check('点店名打开资料弹层', idx4.data.shopOpen === true)
+  idx4.onCall()
+  idx4.onCopyAddr()
+  idx4.closeShopInfo()
+  check('关闭资料弹层', idx4.data.shopOpen === false)
+
+  console.log('=== 9. 搜索商品 ===')
+  const sp = loadPage('pages/search/search.js')
+  sp.onLoad()
+  await tick(50)
+  // 前面第 6 节把 p_nail 下架了，所以这里只应有 21 款在售
+  check('搜索页只拿在售商品', sp.data.products.length === 21 && sp.data.products.every(p => p.on !== false), sp.data.products.length)
+  sp.onInput({ detail: { value: '珍珠' } })
+  check('搜「珍珠」有结果', sp.data.results.length >= 2, sp.data.results.length)
+  check('结果名含关键词', sp.data.results.every(p => p.name.indexOf('珍珠') >= 0 || (p.desc || '').indexOf('珍珠') >= 0))
+  sp.onInput({ detail: { value: '不存在的款' } })
+  check('无结果时为空', sp.data.results.length === 0)
+  sp.onClear()
+  check('清空关键词', sp.data.kw === '' && sp.data.results.length === 0)
+  sp.onInput({ detail: { value: '耳' } })
+  const first = sp.data.results[0]
+  sp.onAdd({ currentTarget: { dataset: { id: first._id } } })
+  const cartNow = mem['shop_cart_v1'] || {}
+  check('搜索结果可直接加购', cartNow[first._id] === 1, cartNow)
 
   console.log(failed ? `\n❌ ${failed} 项失败` : '\n✅ 全部通过')
   process.exit(failed ? 1 : 0)

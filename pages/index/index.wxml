@@ -3,7 +3,7 @@
     <view class="hero-glow"></view>
     <view class="hero-row">
       <view class="avatar"><text class="avatar-emoji">🐻</text></view>
-      <view class="shop-meta">
+      <view class="shop-meta" bindtap="onShopInfo">
         <view class="shop-name">{{shop.name}}</view>
         <view class="shop-sub">选款下单 · 免配送费</view>
       </view>
@@ -16,9 +16,15 @@
 
     <view class="sheet-tools">
       <text class="free">免配送费</text>
-      <view class="orders-link" bindtap="goOrders">
-        <text class="orders-ico">🧾</text>
-        <text>我的订单</text>
+      <view class="tools-right">
+        <view class="orders-link" bindtap="goSearch">
+          <text class="orders-ico">🔍</text>
+          <text>搜索</text>
+        </view>
+        <view class="orders-link" bindtap="goOrders">
+          <text class="orders-ico">🧾</text>
+          <text>我的订单</text>
+        </view>
       </view>
     </view>
 
@@ -67,6 +73,32 @@
         </view>
         <view class="goods-foot">— 已经到底啦 —</view>
       </scroll-view>
+    </view>
+  </view>
+
+  <view class="shop-mask {{shopOpen ? 'show' : ''}}" bindtap="closeShopInfo"></view>
+  <view class="shop-panel {{shopOpen ? 'show' : ''}}">
+    <view class="sp-close" bindtap="closeShopInfo">✕</view>
+    <view class="sp-avatar">{{shop.avatar}}</view>
+    <view class="sp-name">{{shop.name}}</view>
+    <view class="sp-desc">{{shop.notice}}</view>
+    <view class="sp-row" bindtap="onCall">
+      <text class="sp-ico">📞</text>
+      <text class="sp-val">{{shop.phone}}</text>
+      <text class="sp-arrow">›</text>
+    </view>
+    <view class="sp-row" bindtap="onCopyAddr">
+      <text class="sp-ico">📍</text>
+      <text class="sp-val">{{shop.address}}</text>
+      <text class="sp-arrow">›</text>
+    </view>
+    <view class="sp-row">
+      <text class="sp-ico">🕙</text>
+      <text class="sp-val">{{shop.hours}}</text>
+    </view>
+    <view class="sp-row">
+      <text class="sp-ico">💬</text>
+      <text class="sp-val">{{shop.wechat}}</text>
     </view>
   </view>
 

@@ -1,0 +1,154 @@
+.page {
+  min-height: 100vh;
+  background: #fff;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  border-bottom: 1rpx solid #f4f4f4;
+}
+
+.input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 72rpx;
+  padding: 0 20rpx;
+  border-radius: 12rpx;
+  background: #f5f5f5;
+}
+
+.ico {
+  margin-right: 10rpx;
+  font-size: 26rpx;
+  opacity: 0.5;
+}
+
+.input {
+  flex: 1;
+  font-size: 27rpx;
+  height: 72rpx;
+}
+
+.ph {
+  color: #bbb;
+}
+
+.clear {
+  padding: 0 6rpx;
+  color: #bbb;
+  font-size: 26rpx;
+}
+
+.cancel {
+  margin-left: 24rpx;
+  font-size: 27rpx;
+  color: #333;
+}
+
+.hint {
+  padding: 60rpx 30rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+.list {
+  padding: 0 24rpx 60rpx;
+}
+
+.card {
+  display: flex;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #f4f4f4;
+}
+
+.thumb {
+  flex: none;
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb-emoji {
+  font-size: 56rpx;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
+  padding: 4rpx 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.name {
+  font-size: 29rpx;
+  font-weight: 500;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desc {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #9a9a9a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.price {
+  color: #ff3b30;
+  display: flex;
+  align-items: baseline;
+}
+
+.price .sym {
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.price .num {
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-left: 2rpx;
+}
+
+.plus {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 12rpx;
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 40rpx;
+  line-height: 48rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 10rpx rgba(255, 77, 79, 0.35);
+}
+
+.plus:active {
+  transform: scale(0.92);
+}
+
+.empty {
+  padding: 120rpx 40rpx;
+  text-align: center;
+  color: #bbb;
+  font-size: 25rpx;
+}

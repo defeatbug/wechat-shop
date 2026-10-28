@@ -84,6 +84,39 @@
     user-select: none; cursor: pointer; }
   .plus:active { transform: scale(.9); }
   .foot { padding: 15px 0 30px; text-align: center; font-size: 11px; color: #c4c4c4; }
+  .tools-right { display: flex; align-items: center; gap: 16px; }
+
+  .shop-sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; background: #fff;
+    border-radius: 18px 18px 0 0; padding: 34px 24px 30px; text-align: center;
+    transform: translateY(110%); transition: transform .26s ease; z-index: 60;
+  }
+  .shop-sheet.show { transform: translateY(0); }
+  .ss-close { position: absolute; right: 18px; top: 14px; color: #bbb; font-size: 15px; }
+  .ss-avatar { width: 64px; height: 64px; margin: 0 auto; border-radius: 50%; background: #fdf8f2;
+    border: 2px solid #f2ece4; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+  .ss-name { margin-top: 10px; font-size: 17px; font-weight: 700; color: #111; }
+  .ss-desc { margin: 6px 0 14px; font-size: 11.5px; color: #999; line-height: 1.6; }
+  .ss-row { display: flex; align-items: center; padding: 13px 0; border-top: 1px solid #f4f4f4; text-align: left; }
+  .ss-ico { width: 28px; font-size: 15px; }
+  .ss-val { flex: 1; font-size: 13.5px; color: #333; line-height: 1.5; }
+  .ss-arrow { color: #ccc; font-size: 15px; }
+
+  .search-layer {
+    position: absolute; inset: 0; background: #fff; z-index: 70;
+    transform: translateY(100%); transition: transform .25s ease;
+  }
+  .search-layer.show { transform: translateY(0); }
+  .search-bar { display: flex; align-items: center; padding: 14px 12px; border-bottom: 1px solid #f4f4f4; margin-top: 44px; }
+  .search-input-wrap { flex: 1; display: flex; align-items: center; height: 36px; padding: 0 10px;
+    border-radius: 8px; background: #f5f5f5; }
+  .search-ico { margin-right: 6px; font-size: 13px; opacity: .5; }
+  .search-input-wrap input { flex: 1; border: 0; outline: 0; background: transparent; font-size: 13.5px; }
+  .search-cancel { margin-left: 12px; font-size: 13.5px; color: #333; }
+  .search-empty { padding: 60px 20px; text-align: center; font-size: 12px; color: #bbb; }
+  .search-results { padding: 0 11px; }
+  .search-results .card { padding: 10px 0 12px; }
+
   .home-indicator { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
     width: 134px; height: 5px; border-radius: 3px; background: #111; opacity: .85; z-index: 40; }
 
@@ -151,7 +184,7 @@
   </div>
 
   <div class="hero">
-    <div class="row">
+    <div class="row" id="openShop">
       <div class="avatar">🐻</div>
       <div class="shop">
         <div class="name">喜欢温柔</div>
@@ -165,7 +198,10 @@
     <div class="sheet-line"></div>
     <div class="tools">
       <span class="free">免配送费</span>
-      <span class="orders">🧾 我的订单</span>
+      <span class="tools-right">
+        <span class="orders" id="openSearch">🔍 搜索</span>
+        <span class="orders">🧾 我的订单</span>
+      </span>
     </div>
     <div class="body">
       <div class="cats" id="cats"></div>
@@ -204,6 +240,30 @@
       </div>
       <div class="c-submit">提交选款</div>
     </div>
+  </div>
+
+  <div class="mask" id="shopMask"></div>
+  <div class="shop-sheet" id="shopSheet">
+    <div class="ss-close" id="closeShop">✕</div>
+    <div class="ss-avatar">🐻</div>
+    <div class="ss-name">喜欢温柔</div>
+    <div class="ss-desc">选好款提交即可，免配送费；提交后店主会联系你确认，线下付款。</div>
+    <div class="ss-row"><span class="ss-ico">📞</span><span class="ss-val">18348259989</span><span class="ss-arrow">›</span></div>
+    <div class="ss-row"><span class="ss-ico">📍</span><span class="ss-val">盛世新天地10号楼106商铺 喜欢温柔集合店</span><span class="ss-arrow">›</span></div>
+    <div class="ss-row"><span class="ss-ico">🕙</span><span class="ss-val">每天 10:00 - 21:30</span></div>
+    <div class="ss-row"><span class="ss-ico">💬</span><span class="ss-val">微信同号，可私信</span></div>
+  </div>
+
+  <div class="search-layer" id="searchLayer">
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <span class="search-ico">🔍</span>
+        <input id="searchInput" placeholder="商品名称" />
+      </div>
+      <span class="search-cancel" id="searchCancel">取消</span>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-empty" id="searchEmpty">输入关键词搜索，比如「珍珠」「项链」「发饰」</div>
   </div>
 
   <div class="home-indicator"></div>
@@ -263,23 +323,25 @@
   });
 
   // 商品
+  function makeCard(p) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="thumb" style="background:' + p.bg + '"><span class="emo">' + p.emoji + '</span>' +
+      (p.price === 0 ? '<span class="free-tag">0元</span>' : '') + '</div>' +
+      '<div class="info"><div class="name">' + p.name + '</div><div class="desc">' + p.desc + '</div>' +
+      '<div class="row"><div class="price"><span class="sym">¥</span><span class="num">' + yuan(p.price) + '</span></div>' +
+      '<div class="plus" data-id="' + p.id + '">＋</div></div></div>';
+    return card;
+  }
+
   const goodsEl = document.getElementById('goods');
   groups.forEach(g => {
     const title = document.createElement('div');
     title.className = 'group-title';
     title.textContent = g.name + (g.emoji || '');
     goodsEl.appendChild(title);
-    g.items.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML =
-        '<div class="thumb" style="background:' + p.bg + '"><span class="emo">' + p.emoji + '</span>' +
-        (p.price === 0 ? '<span class="free-tag">0元</span>' : '') + '</div>' +
-        '<div class="info"><div class="name">' + p.name + '</div><div class="desc">' + p.desc + '</div>' +
-        '<div class="row"><div class="price"><span class="sym">¥</span><span class="num">' + yuan(p.price) + '</span></div>' +
-        '<div class="plus" data-id="' + p.id + '">＋</div></div></div>';
-      goodsEl.appendChild(card);
-    });
+    g.items.forEach(p => goodsEl.appendChild(makeCard(p)));
   });
   const foot = document.createElement('div');
   foot.className = 'foot';
@@ -312,8 +374,8 @@
     }).join('');
   }
 
-  goodsEl.addEventListener('click', e => {
-    const btn = e.target.closest('.plus');
+  document.querySelector('.app').addEventListener('click', e => {
+    const btn = e.target.closest('.card .plus');
     if (!btn) return;
     const id = btn.dataset.id;
     cart[id] = (cart[id] || 0) + 1;
@@ -344,8 +406,61 @@
   document.getElementById('cClose').addEventListener('click', closeConfirm);
   mask.addEventListener('click', closeConfirm);
 
+  // 店铺资料
+  const shopMask = document.getElementById('shopMask');
+  const shopSheet = document.getElementById('shopSheet');
+  function openShop() { shopMask.classList.add('show'); shopSheet.classList.add('show'); }
+  function closeShop() { shopMask.classList.remove('show'); shopSheet.classList.remove('show'); }
+  document.getElementById('openShop').addEventListener('click', openShop);
+  document.getElementById('closeShop').addEventListener('click', closeShop);
+  shopMask.addEventListener('click', closeShop);
+
+  // 搜索
+  const searchLayer = document.getElementById('searchLayer');
+  const searchInput = document.getElementById('searchInput');
+  function openSearch() {
+    searchLayer.classList.add('show');
+    setTimeout(() => searchInput.focus(), 260);
+  }
+  function closeSearch() {
+    searchLayer.classList.remove('show');
+    searchInput.value = '';
+    searchResults.innerHTML = '';
+    searchEmpty.style.display = 'block';
+  }
+  document.getElementById('openSearch').addEventListener('click', openSearch);
+  document.getElementById('searchCancel').addEventListener('click', closeSearch);
+  const searchResults = document.getElementById('searchResults');
+  const searchEmpty = document.getElementById('searchEmpty');
+  function renderSearch(kw) {
+    searchResults.innerHTML = '';
+    if (!kw) {
+      searchEmpty.style.display = 'block';
+      searchEmpty.textContent = '输入关键词搜索，比如「珍珠」「项链」「发饰」';
+      return;
+    }
+    const res = PRODUCTS.filter(p => (p.name + p.desc).toLowerCase().indexOf(kw) >= 0);
+    if (!res.length) {
+      searchEmpty.style.display = 'block';
+      searchEmpty.textContent = '没有找到「' + kw + '」相关商品';
+      return;
+    }
+    searchEmpty.style.display = 'none';
+    res.forEach(p => searchResults.appendChild(makeCard(p)));
+  }
+  searchInput.addEventListener('input', () => renderSearch(searchInput.value.trim().toLowerCase()));
+
   // 预览状态：?state=cart 直接展示已选 + 确认弹层
   const params = new URLSearchParams(location.search);
+  if (params.get('state') === 'search') {
+    openSearch();
+    searchInput.value = '珍珠';
+    searchInput.dispatchEvent(new Event('input'));
+  }
+  if (params.get('state') === 'shop') {
+    openShop();
+  }
+
   if (params.get('state') === 'cart') {
     cart['p_necklace'] = 1;
     cart['p_hat50'] = 1;
