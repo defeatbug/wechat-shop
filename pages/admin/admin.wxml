@@ -1,0 +1,42 @@
+<view class="page">
+  <view class="tabs">
+    <view class="tab {{tab === 'orders' ? 'on' : ''}}" data-tab="orders" bindtap="onTab">订单</view>
+    <view class="tab {{tab === 'goods' ? 'on' : ''}}" data-tab="goods" bindtap="onTab">商品</view>
+  </view>
+
+  <view class="warn" wx:if="{{isLocal}}">
+    演示模式：这里的改动只保存在本机。接入云开发后，订单与商品会写入云端，所有顾客共用。
+  </view>
+
+  <block wx:if="{{tab === 'orders'}}">
+    <view class="order" wx:for="{{orders}}" wx:key="_id">
+      <view class="row1">
+        <text class="no">{{item.no}}</text>
+        <text class="status">{{item.statusText}}</text>
+      </view>
+      <view class="row2">{{item.contactName}} · {{item.contactPhone}} · {{item.pickup}}</view>
+      <view class="row3">
+        <text class="summary">{{item.summary}}</text>
+        <text class="total">¥{{item.totalText}}</text>
+      </view>
+      <view class="row4" wx:if="{{item.remark}}">备注：{{item.remark}}</view>
+      <view class="acts" wx:if="{{item.status !== 'done'}}">
+        <view class="act" data-id="{{item._id}}" bindtap="onAdvance">
+          {{item.status === 'pending' ? '标记已确认' : '标记已完成'}}
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{!orders.length}}">还没有订单</view>
+  </block>
+
+  <block wx:else>
+    <view class="p" wx:for="{{products}}" wx:key="_id">
+      <view class="p-thumb" style="background:{{item.bg}}"><text class="p-emoji">{{item.emoji}}</text></view>
+      <view class="p-main">
+        <view class="p-name">{{item.name}}</view>
+        <view class="p-price">¥{{item.priceText}}</view>
+      </view>
+      <switch checked="{{item.on !== false}}" color="#ff4d4f" data-id="{{item._id}}" bindchange="onToggle" />
+    </view>
+  </block>
+</view>

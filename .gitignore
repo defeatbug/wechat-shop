@@ -1,0 +1,12 @@
+.DS_Store
+*.log
+
+# 依赖
+node_modules/
+miniprogram_npm/
+cloudfunctions/*/node_modules/
+
+# 上线/备案相关材料：本地保留，不入库
+docs/备案与资质.md
+docs/备案填报信息表.md
+docs/方案对比.md

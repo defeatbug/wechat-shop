@@ -1,0 +1,42 @@
+page {
+  background: #f6f6f6;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 28rpx;
+}
+
+view, text, input, textarea, button {
+  box-sizing: border-box;
+}
+
+.empty {
+  padding: 160rpx 40rpx;
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+}
+
+.btn-primary {
+  background: #ff4d4f;
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 88rpx;
+  height: 88rpx;
+  text-align: center;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-primary[disabled] {
+  background: #ffc2c3;
+  color: #fff;
+}
+
+.money {
+  color: #ff3b30;
+  font-weight: 600;
+}

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>选款下单 · 预览</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #f6f6f6; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    color: #333;
+    width: 390px;
+    height: 844px;
+    overflow: hidden;
+  }
+  .app { position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; overflow: hidden; background: #f6f6f6; }
+
+  /* 状态栏 */
+  .statusbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 20;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 22px 6px; color: #fff; font-size: 15px; font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,.25);
+  }
+  .statusbar .right { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .bars { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
+  .bars i { display: block; width: 3px; background: #fff; border-radius: 1px; }
+  .bars i:nth-child(1){height:4px}.bars i:nth-child(2){height:6px}
+  .bars i:nth-child(3){height:8px}.bars i:nth-child(4){height:11px}
+  .battery { width: 24px; height: 12px; border: 1.5px solid rgba(255,255,255,.9); border-radius: 3px; position: relative; padding: 1.5px; }
+  .battery:after { content:''; position:absolute; right:-4px; top:3px; width:2px; height:5px; background:rgba(255,255,255,.9); border-radius:0 2px 2px 0; }
+  .battery i { display: block; height: 100%; width: 80%; background: #fff; border-radius: 1px; }
+
+  /* 顶部封面 */
+  .hero { position: relative; flex: none; height: 200px; overflow: hidden;
+    background: linear-gradient(135deg,#ecd9d3 0%,#cfbac6 36%,#a9a7be 66%,#8b93ac 100%); }
+  .hero:before { content:''; position:absolute; width:260px;height:260px;border-radius:50%;
+    right:-70px; top:-110px; background: rgba(255,255,255,.30); filter: blur(8px); }
+  .hero:after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,0) 40%); }
+  .hero .row { position: absolute; left: 18px; bottom: 46px; display: flex; align-items: center; z-index: 2; }
+  .avatar { width: 52px; height: 52px; border-radius: 50%; background: #fdf8f2; border: 2px solid rgba(255,255,255,.92);
+    display: flex; align-items: center; justify-content: center; font-size: 27px; box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+  .shop { margin-left: 10px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.2); }
+  .shop .name { font-size: 19px; font-weight: 700; letter-spacing: .5px; }
+  .shop .sub { margin-top: 3px; font-size: 11px; opacity: .92; }
+
+  /* 下单面板 */
+  .sheet { position: relative; flex: 1; min-height: 0; margin-top: -14px; background: #fff;
+    border-radius: 14px 14px 0 0; display: flex; flex-direction: column; z-index: 3; }
+  .sheet-title { padding-top: 13px; text-align: center; font-size: 16px; font-weight: 600; color: #111; }
+  .sheet-line { width: 38px; height: 3px; border-radius: 2px; background: #222; margin: 7px auto 0; }
+  .tools { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 13px 15px 9px; }
+  .free { font-size: 13px; color: #666; }
+  .orders { font-size: 13px; color: #444; }
+
+  .body { flex: 1; min-height: 0; display: flex; }
+  .cats { flex: none; width: 92px; overflow-y: auto; background: #f6f6f6; padding-bottom: 120px; }
+  .cats::-webkit-scrollbar, .goods::-webkit-scrollbar { display: none; }
+  .cat { position: relative; min-height: 52px; padding: 0 9px; display: flex; align-items: center;
+    font-size: 13px; color: #7a7a7a; line-height: 1.25; }
+  .cat.on { background: #fff; color: #1a1a1a; font-weight: 700; }
+  .cat.on:before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+    width:3px; height:18px; border-radius:0 3px 3px 0; background:#ff3b30; }
+
+  .goods { flex: 1; min-width: 0; overflow-y: auto; padding: 0 11px 130px; }
+  .group-title { padding: 11px 0 5px; font-size: 16px; font-weight: 800; color: #111; letter-spacing: .3px; }
+  .card { display: flex; padding: 9px 0 11px; border-bottom: 1px solid #f4f4f4; }
+  .card:last-child { border-bottom: none; }
+  .thumb { position: relative; flex: none; width: 84px; height: 84px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; }
+  .thumb .emo { font-size: 34px; }
+  .free-tag { position: absolute; left: 0; top: 0; padding: 1px 6px; border-radius: 6px 0 6px 0;
+    background: rgba(255,59,48,.93); color: #fff; font-size: 10px; }
+  .info { flex: 1; min-width: 0; margin-left: 10px; padding: 2px 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .info .name { font-size: 15px; font-weight: 500; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .info .desc { margin-top: 3px; font-size: 11px; color: #9a9a9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .info .row { display: flex; align-items: flex-end; justify-content: space-between; }
+  .price { color: #ff3b30; display: flex; align-items: baseline; }
+  .price .sym { font-size: 12px; font-weight: 600; }
+  .price .num { font-size: 17px; font-weight: 800; margin-left: 1px; letter-spacing: -.2px; }
+  .plus { width: 26px; height: 26px; border-radius: 6px; background: #ff4d4f; color: #fff;
+    font-size: 20px; line-height: 24px; text-align: center; box-shadow: 0 2px 6px rgba(255,77,79,.35);
+    user-select: none; cursor: pointer; }
+  .plus:active { transform: scale(.9); }
+  .foot { padding: 15px 0 30px; text-align: center; font-size: 11px; color: #c4c4c4; }
+  .home-indicator { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
+    width: 134px; height: 5px; border-radius: 3px; background: #111; opacity: .85; z-index: 40; }
+
+  /* 底部结算条 */
+  .cartbar { position: absolute; left: 0; right: 0; bottom: 0; height: 62px; padding: 0 12px 14px;
+    background: #fff; display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 -3px 12px rgba(0,0,0,.08); transform: translateY(110%); transition: transform .24s ease; z-index: 30; }
+  .cartbar.show { transform: translateY(0); }
+  .cart-left { display: flex; align-items: center; }
+  .cart-ico { position: relative; width: 42px; height: 42px; border-radius: 50%; background: #f7f7f7;
+    display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .badge { position: absolute; top: -3px; right: -4px; min-width: 16px; height: 16px; padding: 0 4px;
+    border-radius: 9px; background: #ff3b30; color: #fff; font-size: 10px; line-height: 16px; text-align: center; }
+  .cart-total { margin-left: 10px; }
+  .cart-count { font-size: 11px; color: #999; }
+  .cart-money { font-size: 18px; font-weight: 800; color: #ff3b30; line-height: 1.15; }
+  .cart-money .sym { font-size: 12px; }
+  .cart-go { height: 42px; padding: 0 26px; border-radius: 999px; display: flex; align-items: center;
+    background: linear-gradient(135deg,#ff5b4f,#ff3b30); color: #fff; font-size: 15px; font-weight: 700;
+    box-shadow: 0 4px 10px rgba(255,59,48,.3); }
+
+  /* 确认选款弹层 */
+  .mask { position: absolute; inset: 0; background: rgba(0,0,0,.45); opacity: 0; pointer-events: none;
+    transition: opacity .2s ease; z-index: 40; }
+  .mask.show { opacity: 1; pointer-events: auto; }
+  .confirm { position: absolute; left: 0; right: 0; bottom: 0; height: 620px; background: #fff;
+    border-radius: 18px 18px 0 0; overflow: hidden; transform: translateY(100%); transition: transform .26s ease; z-index: 50;
+    display: flex; flex-direction: column; }
+  .confirm.show { transform: translateY(0); }
+  .c-head { padding: 14px 16px 10px; text-align: center; font-size: 16px; font-weight: 700; border-bottom: 1px solid #f4f4f4; position: relative; }
+  .c-close { position: absolute; right: 16px; top: 14px; color: #bbb; font-size: 16px; }
+  .c-body { flex: 1; overflow-y: auto; padding: 4px 16px 8px; }
+  .c-line { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f6f6f6; }
+  .c-thumb { flex: none; width: 54px; height: 54px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .c-main { flex: 1; margin: 0 10px; }
+  .c-name { font-size: 14px; }
+  .c-price { margin-top: 3px; color: #ff3b30; font-size: 14px; font-weight: 700; }
+  .stepper { display: flex; align-items: center; }
+  .st-btn { width: 26px; height: 26px; border-radius: 50%; background: #f4f4f4; color: #333; font-size: 17px;
+    line-height: 24px; text-align: center; }
+  .st-btn.plus { background: #ff4d4f; color: #fff; }
+  .st-num { min-width: 28px; text-align: center; font-size: 14px; }
+  .c-form { padding: 6px 0 10px; }
+  .f-row { display: flex; align-items: center; min-height: 46px; border-bottom: 1px solid #f6f6f6; }
+  .f-row .lb { width: 72px; font-size: 13px; color: #555; }
+  .f-row .vl { flex: 1; font-size: 13px; text-align: right; color: #222; }
+  .f-row .vl.ph { color: #bbb; }
+  .c-foot { flex: none; padding: 10px 16px 26px; display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid #f4f4f4; }
+  .c-foot .sum { font-size: 12px; color: #999; }
+  .c-foot .money { font-size: 19px; font-weight: 800; color: #ff3b30; }
+  .c-submit { height: 44px; padding: 0 30px; border-radius: 999px; background: linear-gradient(135deg,#ff5b4f,#ff3b30);
+    color: #fff; font-size: 15px; font-weight: 700; display: flex; align-items: center; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="statusbar">
+    <span>14:11</span>
+    <span class="right">
+      <span class="bars"><i></i><i></i><i></i><i></i></span>
+      <span>5G</span>
+      <span class="battery"><i></i></span>
+    </span>
+  </div>
+
+  <div class="hero">
+    <div class="row">
+      <div class="avatar">🐻</div>
+      <div class="shop">
+        <div class="name">喜欢温柔</div>
+        <div class="sub">选款下单 · 免配送费</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-title">下单</div>
+    <div class="sheet-line"></div>
+    <div class="tools">
+      <span class="free">免配送费</span>
+      <span class="orders">🧾 我的订单</span>
+    </div>
+    <div class="body">
+      <div class="cats" id="cats"></div>
+      <div class="goods" id="goods"></div>
+    </div>
+  </div>
+
+  <div class="cartbar" id="cartbar">
+    <div class="cart-left">
+      <div class="cart-ico">🛒<div class="badge" id="badge">0</div></div>
+      <div class="cart-total">
+        <div class="cart-count" id="cartCount">已选 0 件</div>
+        <div class="cart-money"><span class="sym">¥</span><span id="cartMoney">0.00</span></div>
+      </div>
+    </div>
+    <div class="cart-go" id="goConfirm">去确认</div>
+  </div>
+
+  <div class="mask" id="mask"></div>
+
+  <div class="confirm" id="confirm">
+    <div class="c-head">确认选款<span class="c-close" id="cClose">✕</span></div>
+    <div class="c-body">
+      <div id="cLines"></div>
+      <div class="c-form">
+        <div class="f-row"><span class="lb">称呼</span><span class="vl">小温柔</span></div>
+        <div class="f-row"><span class="lb">手机号</span><span class="vl">138****6688</span></div>
+        <div class="f-row"><span class="lb">取货方式</span><span class="vl">到店自提 ›</span></div>
+        <div class="f-row"><span class="lb">备注</span><span class="vl ph">尺码 / 颜色 / 其他要求</span></div>
+      </div>
+    </div>
+    <div class="c-foot">
+      <div>
+        <div class="sum" id="cSum">共 0 件</div>
+        <div class="money">¥<span id="cMoney">0.00</span></div>
+      </div>
+      <div class="c-submit">提交选款</div>
+    </div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+  const CATS = [
+    { id: "must", name: "必选商品" },
+    { id: "new", name: "上新", emoji: "🛍️" },
+    { id: "necklace", name: "项链" },
+    { id: "earring", name: "耳饰" },
+    { id: "bracelet", name: "手链/手镯" },
+    { id: "ring", name: "戒指" },
+    { id: "hair", name: "发饰" },
+    { id: "hat", name: "帽子/围巾" },
+    { id: "bag", name: "包包", emoji: "🎒" },
+    { id: "other", name: "其他小物" }
+  ];
+
+  const PRODUCTS = [
+    { id:"p_giftbox", cat:"must", name:"包装礼盒", price:0, desc:"必选 · 送礼袋与贺卡", emoji:"🎁", bg:"linear-gradient(135deg,#f6dede,#d9a3a8)" },
+    { id:"p_hat50", cat:"new", name:"帽子50", price:0, desc:"0 元福利款 · 每人限 1 件", emoji:"🧢", bg:"linear-gradient(135deg,#b9a3d0,#7f6aa8)" },
+    { id:"p_necklace", cat:"new", name:"沙金项链", price:5900, desc:"不掉色 · 送礼袋", emoji:"📿", bg:"linear-gradient(135deg,#f2d3a8,#c9974f)" },
+    { id:"p_earring_pearl", cat:"new", name:"珍珠耳钉", price:3900, desc:"925 银针 · 不过敏", emoji:"🦪", bg:"linear-gradient(135deg,#f3ece6,#c9b8a8)" },
+    { id:"p_eyemask", cat:"new", name:"小熊眼罩", price:2900, desc:"真丝双面 · 遮光透气", emoji:"🧸", bg:"linear-gradient(135deg,#f7e4e6,#d9a7b0)" },
+    { id:"p_nail", cat:"new", name:"指甲刀", price:1590, desc:"便携钥匙扣款", emoji:"✂️", bg:"linear-gradient(135deg,#dfe8e3,#9fb8ae)" },
+    { id:"p_chain", cat:"necklace", name:"细锁骨链", price:4500, desc:"40+5cm 可调", emoji:"⛓️", bg:"linear-gradient(135deg,#efe6d8,#c2ab84)" },
+    { id:"p_pearlneck", cat:"necklace", name:"珍珠项链", price:6800, desc:"淡水珍珠 · 送绒布袋", emoji:"📿", bg:"linear-gradient(135deg,#f6f0ea,#d3c3b4)" },
+    { id:"p_earclip", cat:"earring", name:"蝴蝶耳夹", price:2500, desc:"无耳洞可戴", emoji:"🦋", bg:"linear-gradient(135deg,#e9e3f6,#b3a2d6)" },
+    { id:"p_hoop", cat:"earring", name:"圈圈耳环", price:1990, desc:"轻量 · 一天不坠耳", emoji:"⭕", bg:"linear-gradient(135deg,#f1e7d9,#c9b28c)" },
+    { id:"p_redstring", cat:"bracelet", name:"幸运红绳手链", price:1990, desc:"可调节 · 本命年", emoji:"🧵", bg:"linear-gradient(135deg,#f6d6d4,#cf7f7a)" },
+    { id:"p_bead", cat:"bracelet", name:"串珠手链", price:3200, desc:"天然石 · 每颗不同", emoji:"🔮", bg:"linear-gradient(135deg,#e3e9f3,#9fb0cc)" },
+    { id:"p_ring", cat:"ring", name:"素圈戒指", price:2200, desc:"开口可调 · 百搭", emoji:"💍", bg:"linear-gradient(135deg,#f0e8da,#c8b394)" },
+    { id:"p_ring2", cat:"ring", name:"开口戒", price:2600, desc:"叠戴好看", emoji:"💫", bg:"linear-gradient(135deg,#efe3ef,#c2a5c4)" },
+    { id:"p_scrunchy", cat:"hair", name:"大肠发圈", price:1200, desc:"不勒头发 · 三色随机", emoji:"🎀", bg:"linear-gradient(135deg,#f8dfe4,#d9a3b4)" },
+    { id:"p_hairclip", cat:"hair", name:"珍珠发夹", price:1500, desc:"一字夹 · 碎发救星", emoji:"🪮", bg:"linear-gradient(135deg,#f5efe7,#d3c1a9)" },
+    { id:"p_bucket", cat:"hat", name:"渔夫帽", price:3500, desc:"可折叠 · 防晒", emoji:"👒", bg:"linear-gradient(135deg,#e6e9d8,#aeb894)" },
+    { id:"p_scarf", cat:"hat", name:"针织围巾", price:3900, desc:"加厚 · 不扎脖", emoji:"🧣", bg:"linear-gradient(135deg,#ecdcd6,#c29a90)" },
+    { id:"p_tote", cat:"bag", name:"帆布托特包", price:4500, desc:"大容量 · 通勤", emoji:"👜", bg:"linear-gradient(135deg,#efe7d8,#c2ac86)" },
+    { id:"p_mini", cat:"bag", name:"迷你斜挎包", price:5900, desc:"链条可拆", emoji:"👝", bg:"linear-gradient(135deg,#e8e0ef,#b3a0c4)" },
+    { id:"p_keyring", cat:"other", name:"钥匙扣", price:990, desc:"软胶挂件", emoji:"🔑", bg:"linear-gradient(135deg,#e4eee9,#a3c0b4)" },
+    { id:"p_mirror", cat:"other", name:"随身化妆镜", price:1800, desc:"双面 · 放包里不占位", emoji:"🪞", bg:"linear-gradient(135deg,#f2e6ea,#cba7b4)" }
+  ];
+
+  const yuan = n => (n / 100).toFixed(2);
+  const cart = {};
+
+  // 分类
+  const catsEl = document.getElementById('cats');
+  const groups = CATS.map(c => ({ ...c, items: PRODUCTS.filter(p => p.cat === c.id) })).filter(g => g.items.length);
+  groups.forEach((g, i) => {
+    const d = document.createElement('div');
+    d.className = 'cat' + (i === 0 ? ' on' : '');
+    d.textContent = g.name + (g.emoji || '');
+    d.dataset.id = g.id;
+    catsEl.appendChild(d);
+  });
+
+  // 商品
+  const goodsEl = document.getElementById('goods');
+  groups.forEach(g => {
+    const title = document.createElement('div');
+    title.className = 'group-title';
+    title.textContent = g.name + (g.emoji || '');
+    goodsEl.appendChild(title);
+    g.items.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<div class="thumb" style="background:' + p.bg + '"><span class="emo">' + p.emoji + '</span>' +
+        (p.price === 0 ? '<span class="free-tag">0元</span>' : '') + '</div>' +
+        '<div class="info"><div class="name">' + p.name + '</div><div class="desc">' + p.desc + '</div>' +
+        '<div class="row"><div class="price"><span class="sym">¥</span><span class="num">' + yuan(p.price) + '</span></div>' +
+        '<div class="plus" data-id="' + p.id + '">＋</div></div></div>';
+      goodsEl.appendChild(card);
+    });
+  });
+  const foot = document.createElement('div');
+  foot.className = 'foot';
+  foot.textContent = '— 已经到底啦 —';
+  goodsEl.appendChild(foot);
+
+  function totals() {
+    let count = 0, sum = 0;
+    Object.keys(cart).forEach(id => {
+      const p = PRODUCTS.find(x => x.id === id);
+      count += cart[id];
+      sum += p.price * cart[id];
+    });
+    return { count, sum };
+  }
+
+  function renderCart() {
+    const { count, sum } = totals();
+    document.getElementById('badge').textContent = count;
+    document.getElementById('cartCount').textContent = '已选 ' + count + ' 件';
+    document.getElementById('cartMoney').textContent = yuan(sum);
+    document.getElementById('cartbar').classList.toggle('show', count > 0);
+    document.getElementById('cSum').textContent = '共 ' + count + ' 件';
+    document.getElementById('cMoney').textContent = yuan(sum);
+    document.getElementById('cLines').innerHTML = Object.keys(cart).map(id => {
+      const p = PRODUCTS.find(x => x.id === id);
+      return '<div class="c-line"><div class="c-thumb" style="background:' + p.bg + '">' + p.emoji + '</div>' +
+        '<div class="c-main"><div class="c-name">' + p.name + '</div><div class="c-price">¥' + yuan(p.price) + '</div></div>' +
+        '<div class="stepper"><div class="st-btn">−</div><div class="st-num">' + cart[id] + '</div><div class="st-btn plus">＋</div></div></div>';
+    }).join('');
+  }
+
+  goodsEl.addEventListener('click', e => {
+    const btn = e.target.closest('.plus');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    cart[id] = (cart[id] || 0) + 1;
+    renderCart();
+  });
+
+  catsEl.addEventListener('click', e => {
+    const el = e.target.closest('.cat');
+    if (!el) return;
+    document.querySelectorAll('.cat').forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+    const t = [...goodsEl.querySelectorAll('.group-title')].find(x => x.textContent.startsWith(el.textContent.replace(/[^一-龥]/g, '')));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  const mask = document.getElementById('mask');
+  const confirmEl = document.getElementById('confirm');
+  function openConfirm() {
+    if (!totals().count) return;
+    mask.classList.add('show');
+    confirmEl.classList.add('show');
+  }
+  function closeConfirm() {
+    mask.classList.remove('show');
+    confirmEl.classList.remove('show');
+  }
+  document.getElementById('goConfirm').addEventListener('click', openConfirm);
+  document.getElementById('cClose').addEventListener('click', closeConfirm);
+  mask.addEventListener('click', closeConfirm);
+
+  // 预览状态：?state=cart 直接展示已选 + 确认弹层
+  const params = new URLSearchParams(location.search);
+  if (params.get('state') === 'cart') {
+    cart['p_necklace'] = 1;
+    cart['p_hat50'] = 1;
+    cart['p_eyemask'] = 1;
+    renderCart();
+    document.getElementById('cartbar').classList.add('show');
+    setTimeout(() => { document.getElementById('mask').classList.add('show'); document.getElementById('confirm').classList.add('show'); }, 100);
+  } else {
+    renderCart();
+  }
+</script>
+</body>
+</html>

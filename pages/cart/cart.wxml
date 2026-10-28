@@ -1,0 +1,60 @@
+<view class="page">
+  <view class="tip">🛒 这里只是选款登记，提交后店主会联系你确认款式与付款方式</view>
+
+  <view class="card" wx:if="{{lines.length}}">
+    <view class="line" wx:for="{{lines}}" wx:key="_id">
+      <view class="thumb" style="background:{{item.bg}}">
+        <text class="thumb-emoji">{{item.emoji}}</text>
+      </view>
+      <view class="line-main">
+        <view class="line-name">{{item.name}}</view>
+        <view class="line-price"><text class="sym">¥</text>{{item.priceText}}</view>
+      </view>
+      <view class="stepper">
+        <view class="st-btn" catchtap="onMinus" data-id="{{item._id}}">−</view>
+        <text class="st-num">{{item.qty}}</text>
+        <view class="st-btn st-plus" catchtap="onPlus" data-id="{{item._id}}">＋</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    还没有选款
+    <view class="empty-btn" bindtap="goBack">去挑几款</view>
+  </view>
+
+  <view class="form" wx:if="{{lines.length}}">
+    <view class="f-row">
+      <text class="f-label">称呼</text>
+      <input class="f-input" placeholder="怎么称呼你" value="{{name}}" bindinput="onName" />
+    </view>
+    <view class="f-row">
+      <text class="f-label">手机号</text>
+      <input class="f-input" type="number" maxlength="11" placeholder="用于联系你确认" value="{{phone}}" bindinput="onPhone" />
+    </view>
+    <view class="f-row">
+      <text class="f-label">微信号</text>
+      <input class="f-input" placeholder="选填，方便店主加你" value="{{wechat}}" bindinput="onWechat" />
+    </view>
+    <view class="f-row">
+      <text class="f-label">取货方式</text>
+      <picker range="{{pickups}}" value="{{pickupIndex}}" bindchange="onPickup">
+        <view class="f-picker">{{pickups[pickupIndex]}}<text class="arrow">›</text></view>
+      </picker>
+    </view>
+    <view class="f-row f-col">
+      <text class="f-label">备注</text>
+      <textarea class="f-textarea" placeholder="尺码 / 颜色 / 其他要求" value="{{remark}}" bindinput="onRemark" maxlength="200" auto-height />
+    </view>
+  </view>
+
+  <view class="footbar" wx:if="{{lines.length}}">
+    <view class="foot-total">
+      <view class="foot-count">共 {{count}} 件</view>
+      <view class="foot-money"><text class="sym">¥</text>{{totalText}}</view>
+    </view>
+    <view class="foot-btn {{submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+      {{submitting ? '提交中…' : '提交选款'}}
+    </view>
+  </view>
+</view>

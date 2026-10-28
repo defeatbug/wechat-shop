@@ -1,0 +1,30 @@
+<view class="page">
+  <view class="hint" wx:if="{{cloudHint}}">{{cloudHint}}</view>
+
+  <view class="order" wx:for="{{orders}}" wx:key="_id">
+    <view class="o-head">
+      <text class="o-no">单号 {{item.no}}</text>
+      <text class="o-status s-{{item.status}}">{{item.statusText}}</text>
+    </view>
+
+    <view class="o-item" wx:for="{{item.items}}" wx:for-item="it" wx:key="id">
+      <text class="o-name">{{it.name}} × {{it.qty}}</text>
+      <text class="o-price">¥{{it.lineText}}</text>
+    </view>
+
+    <view class="o-contact">{{item.contactName}} · {{item.contactPhone}} · {{item.pickup}}</view>
+    <view class="o-remark" wx:if="{{item.remark}}">备注：{{item.remark}}</view>
+
+    <view class="o-foot">
+      <text class="o-time">{{item.timeText}}</text>
+      <text class="o-total">合计 ¥{{item.totalText}}</text>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!orders.length}}">
+    还没有订单
+    <view class="empty-btn" bindtap="goShop">去选款</view>
+  </view>
+
+  <view class="admin-link" bindtap="goAdmin">店主入口 ›</view>
+</view>
