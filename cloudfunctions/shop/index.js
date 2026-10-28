@@ -94,8 +94,20 @@ async function saveProduct(event, openid) {
   const id = p._id
   delete p._id
   delete p.priceText
-  if (!id) return fail('缺少商品 id')
+  delete p.catName
+  // 没有 _id = 新增，有 = 编辑
+  if (!id) {
+    const res = await db.collection(PRODUCTS).add({ data: p })
+    return ok({ product: Object.assign({ _id: res._id }, p) })
+  }
   await db.collection(PRODUCTS).doc(id).update({ data: p })
+  return ok({ product: Object.assign({ _id: id }, p) })
+}
+
+async function deleteProduct(event, openid) {
+  if (!isAdmin(openid)) return fail('无管理员权限')
+  if (!event.id) return fail('缺少商品 id')
+  await db.collection(PRODUCTS).doc(event.id).remove()
   return ok({})
 }
 
@@ -118,6 +130,8 @@ exports.main = async (event, context) => {
         return await updateOrderStatus(event, OPENID)
       case 'saveProduct':
         return await saveProduct(event, OPENID)
+      case 'deleteProduct':
+        return await deleteProduct(event, OPENID)
       default:
         return fail('未知 action: ' + action)
     }

@@ -11,7 +11,7 @@ global.wx = {
   showToast: o => console.log('   [toast]', o.title),
   showModal: o => {
     console.log('   [modal]', o.title, '|', o.content)
-    if (o.success) o.success()
+    if (o.success) o.success({ confirm: true, cancel: false })
   },
   navigateTo: o => console.log('   [navigate]', o.url),
   redirectTo: o => console.log('   [redirect]', o.url),
@@ -130,6 +130,38 @@ function check(name, cond, extra) {
   idx2.onLoad()
   await tick(50)
   check('下架后首页不再出现该商品', !idx2.data.groups.some(g => g.products.some(p => p._id === 'p_nail')))
+
+  console.log('=== 7. 商品新增 / 编辑 / 删除 ===')
+  admin.onAddProduct()
+  check('打开新增弹层', admin.data.editing === true)
+  admin.onField({ currentTarget: { dataset: { k: 'name' } }, detail: { value: '测试耳夹' } })
+  admin.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '19.9' } })
+  admin.onField({ currentTarget: { dataset: { k: 'desc' } }, detail: { value: '测试用' } })
+  admin.onField({ currentTarget: { dataset: { k: 'emoji' } }, detail: { value: '📎' } })
+  admin.onCatChange({ detail: { value: 3 } })
+  admin.onSaveProduct()
+  await tick(60)
+  check('新增后商品 23 条', admin.data.products.length === 23, admin.data.products.length)
+  const added = admin.data.products.filter(p => p.name === '测试耳夹')[0]
+  check('新商品价格 19.90', added && added.priceText === '19.90', added && added.priceText)
+  check('新商品落在所选分类', added && added.catId === admin.data.cats[3].id, added && added.catId)
+
+  admin.onEditProduct({ currentTarget: { dataset: { id: added._id } } })
+  check('编辑弹层带出原值', admin.data.form.name === '测试耳夹')
+  admin.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '29' } })
+  admin.onSaveProduct()
+  await tick(60)
+  const edited = admin.data.products.filter(p => p._id === added._id)[0]
+  check('改价后 29.00', edited && edited.priceText === '29.00', edited && edited.priceText)
+
+  admin.onDeleteProduct({ currentTarget: { dataset: { id: added._id } } })
+  await tick(60)
+  check('删除后回到 22 条', admin.data.products.length === 22, admin.data.products.length)
+
+  const idx3 = loadPage('pages/index/index.js')
+  idx3.onLoad()
+  await tick(50)
+  check('首页不出现已删除商品', !idx3.data.groups.some(g => g.products.some(p => p.name === '测试耳夹')))
 
   console.log(failed ? `\n❌ ${failed} 项失败` : '\n✅ 全部通过')
   process.exit(failed ? 1 : 0)

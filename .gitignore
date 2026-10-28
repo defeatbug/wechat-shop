@@ -10,3 +10,8 @@ cloudfunctions/*/node_modules/
 docs/备案与资质.md
 docs/备案填报信息表.md
 docs/方案对比.md
+
+# 微信开发者工具本地配置（含个人设置，不进仓库）
+project.private.config.json
+miniprogram_npm/
+.wxcloud/

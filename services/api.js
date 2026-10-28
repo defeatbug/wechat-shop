@@ -39,18 +39,25 @@ function decorate(list) {
   return (list || []).map(p => Object.assign({}, p, { priceText: fmtPrice(p.price) }))
 }
 
+// 本地模式：演示数据 + 店主新增 - 删除，再叠加改价/上下架覆盖
+function localCatalog() {
+  const overrides = store.getProductOverrides()
+  const custom = store.getCustomProducts()
+  const deleted = store.getDeletedProducts()
+  const products = mock.products
+    .concat(custom)
+    .filter(p => deleted.indexOf(p._id) < 0)
+    .map(p => (overrides[p._id] ? Object.assign({}, p, overrides[p._id]) : p))
+  return { categories: mock.categories, products, shop: mock.shop }
+}
+
 function getCatalog() {
   if (cloudReady) {
     return call('catalog')
       .then(d => (d && d.products && d.products.length ? d : mock))
       .catch(() => mock)
   }
-  // 本地模式：叠加店主在 admin 页面做过的上架/改价
-  const overrides = store.getProductOverrides()
-  const products = mock.products.map(p =>
-    overrides[p._id] ? Object.assign({}, p, overrides[p._id]) : p
-  )
-  return Promise.resolve({ categories: mock.categories, products, shop: mock.shop })
+  return Promise.resolve(localCatalog())
 }
 
 function buildOrder(payload) {
@@ -109,11 +116,43 @@ function updateOrderStatus(id, status) {
 }
 
 function saveProduct(product) {
-  if (cloudReady) return call('saveProduct', { product }).then(() => true)
+  if (cloudReady) return call('saveProduct', { product }).then(d => (d && d.product) || product)
+  const p = Object.assign({}, product)
+  const custom = store.getCustomProducts()
+  // 新增
+  if (!p._id) {
+    p._id = 'c_' + Date.now()
+    store.setCustomProducts(custom.concat([p]))
+    return Promise.resolve(p)
+  }
+  // 编辑自定义商品
+  if (custom.some(c => c._id === p._id)) {
+    store.setCustomProducts(
+      custom.map(c => (c._id === p._id ? Object.assign({}, c, p) : c))
+    )
+    return Promise.resolve(p)
+  }
+  // 编辑演示商品：写覆盖层
+  store.setProductOverride(p._id, p)
+  return Promise.resolve(p)
+}
+
+function deleteProduct(id) {
+  if (cloudReady) return call('deleteProduct', { id }).then(() => true)
+  const custom = store.getCustomProducts()
+  if (custom.some(c => c._id === id)) {
+    store.setCustomProducts(custom.filter(c => c._id !== id))
+  } else {
+    const deleted = store.getDeletedProducts()
+    if (deleted.indexOf(id) < 0) {
+      deleted.push(id)
+      store.setDeletedProducts(deleted)
+    }
+  }
   return Promise.resolve(true)
 }
 
 module.exports = {
   init, isCloud, getCatalog, submitOrder, getMyOrders, listOrders,
-  updateOrderStatus, saveProduct, fmtPrice, decorate
+  updateOrderStatus, saveProduct, deleteProduct, fmtPrice, decorate
 }

@@ -30,13 +30,69 @@
   </block>
 
   <block wx:else>
+    <view class="add-btn" bindtap="onAddProduct">＋ 新增商品</view>
+
     <view class="p" wx:for="{{products}}" wx:key="_id">
       <view class="p-thumb" style="background:{{item.bg}}"><text class="p-emoji">{{item.emoji}}</text></view>
       <view class="p-main">
         <view class="p-name">{{item.name}}</view>
-        <view class="p-price">¥{{item.priceText}}</view>
+        <view class="p-price">
+          ¥{{item.priceText}}
+          <text class="p-cat" wx:if="{{item.catName}}"> · {{item.catName}}</text>
+          <text class="p-off" wx:if="{{item.on === false}}"> 已下架</text>
+        </view>
+      </view>
+      <view class="p-ops">
+        <text class="op" data-id="{{item._id}}" bindtap="onEditProduct">编辑</text>
+        <text class="op del" data-id="{{item._id}}" bindtap="onDeleteProduct">删除</text>
       </view>
       <switch checked="{{item.on !== false}}" color="#ff4d4f" data-id="{{item._id}}" bindchange="onToggle" />
     </view>
+
+    <view class="empty" wx:if="{{!products.length}}">还没有商品，点上面「新增商品」</view>
   </block>
+
+  <!-- 新增 / 编辑 弹层 -->
+  <view class="mask {{editing ? 'show' : ''}}" bindtap="closeEditor"></view>
+  <view class="editor {{editing ? 'show' : ''}}">
+    <view class="e-head">
+      {{form._id ? '编辑商品' : '新增商品'}}
+      <text class="e-close" bindtap="closeEditor">✕</text>
+    </view>
+
+    <scroll-view scroll-y class="e-body">
+      <view class="f-row">
+        <text class="f-label">名称</text>
+        <input class="f-input" value="{{form.name}}" data-k="name" bindinput="onField" placeholder="如 珍珠耳钉" />
+      </view>
+      <view class="f-row">
+        <text class="f-label">分类</text>
+        <picker range="{{catNames}}" value="{{form.catIndex}}" bindchange="onCatChange">
+          <view class="f-picker">{{catNames[form.catIndex]}}<text class="arrow">›</text></view>
+        </picker>
+      </view>
+      <view class="f-row">
+        <text class="f-label">价格（元）</text>
+        <input class="f-input" type="digit" value="{{form.priceYuan}}" data-k="priceYuan" bindinput="onField" placeholder="0 表示免费款" />
+      </view>
+      <view class="f-row">
+        <text class="f-label">描述</text>
+        <input class="f-input" value="{{form.desc}}" data-k="desc" bindinput="onField" placeholder="一句话卖点" />
+      </view>
+      <view class="f-row">
+        <text class="f-label">图标</text>
+        <input class="f-input" value="{{form.emoji}}" data-k="emoji" bindinput="onField" placeholder="emoji，如 💍" />
+      </view>
+      <view class="f-row">
+        <text class="f-label">上架</text>
+        <view class="f-switch"><switch checked="{{form.on}}" color="#ff4d4f" bindchange="onSwitchOn" /></view>
+      </view>
+      <view class="e-tip">图片暂用 emoji 占位；接云存储后可在商品里换成实拍图。</view>
+    </scroll-view>
+
+    <view class="e-foot">
+      <view class="e-btn ghost" bindtap="closeEditor">取消</view>
+      <view class="e-btn primary" bindtap="onSaveProduct">保存</view>
+    </view>
+  </view>
 </view>
