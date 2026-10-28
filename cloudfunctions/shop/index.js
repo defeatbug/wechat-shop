@@ -60,6 +60,10 @@ async function submitOrder(event, openid) {
   return ok({ order: Object.assign({ _id: res._id }, doc) })
 }
 
+async function whoami(openid) {
+  return ok({ openid, isAdmin: isAdmin(openid) })
+}
+
 async function myOrders(openid) {
   const res = await db
     .collection(ORDERS)
@@ -122,6 +126,8 @@ exports.main = async (event, context) => {
         return await seedData()
       case 'submitOrder':
         return await submitOrder(event, OPENID)
+      case 'whoami':
+        return await whoami(OPENID)
       case 'myOrders':
         return await myOrders(OPENID)
       case 'listOrders':

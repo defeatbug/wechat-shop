@@ -26,5 +26,7 @@
     <view class="empty-btn" bindtap="goShop">去选款</view>
   </view>
 
-  <view class="admin-link" bindtap="goAdmin">店主入口 ›</view>
+  <view class="admin-link" wx:if="{{showAdminEntry}}" bindtap="goAdmin">
+    {{isLocal ? '店主入口（演示密码）' : '店主入口'}} ›
+  </view>
 </view>

@@ -111,10 +111,13 @@ function check(name, cond, extra) {
   const op = loadPage('pages/orders/orders.js')
   op.onShow()
   await tick(50)
+  await tick(30)
   check('订单列表 1 条', op.data.orders.length === 1, op.data.orders.length)
+  check('本地模式显示店主入口', op.data.showAdminEntry === true)
   check('状态文案正确', op.data.orders[0].statusText === '待确认', op.data.orders[0].statusText)
 
   console.log('=== 5. 店主后台 ===')
+  mem['admin_ok'] = 1 // 本地演示模式：先通过管理密码
   const admin = loadPage('pages/admin/admin.js')
   admin.onLoad()
   admin.onShow()
@@ -196,6 +199,20 @@ function check(name, cond, extra) {
   sp.onAdd({ currentTarget: { dataset: { id: first._id } } })
   const cartNow = mem['shop_cart_v1'] || {}
   check('搜索结果可直接加购', cartNow[first._id] === 1, cartNow)
+
+  console.log('=== 10. 后台权限 ===')
+  delete mem['admin_ok']
+  const admin2 = loadPage('pages/admin/admin.js')
+  admin2.onLoad()
+  await tick(50)
+  check('未通过密码时后台被拒', admin2.data.denied === true)
+  check('被拒时不加载订单', admin2.data.orders.length === 0)
+
+  mem['admin_ok'] = 1
+  const admin3 = loadPage('pages/admin/admin.js')
+  admin3.onLoad()
+  await tick(50)
+  check('通过密码后可进入', admin3.data.ready === true && admin3.data.denied === false)
 
   console.log(failed ? `\n❌ ${failed} 项失败` : '\n✅ 全部通过')
   process.exit(failed ? 1 : 0)

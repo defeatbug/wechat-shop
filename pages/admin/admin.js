@@ -30,15 +30,35 @@ Page({
     cats: [],
     catNames: [],
     editing: false,
-    form: {}
+    form: {},
+    ready: false,
+    denied: false
   },
 
   onLoad() {
-    this.setData({ isLocal: !api.isCloud() })
+    // 权限：云模式看 openid 白名单；本地演示模式需要管理密码
+    api.whoami().then(r => {
+      if (r.isAdmin) {
+        this.setData({ isLocal: false, ready: true })
+        this.refresh()
+        return
+      }
+      if (r.local && wx.getStorageSync('admin_ok')) {
+        this.setData({ isLocal: true, ready: true })
+        this.refresh()
+        return
+      }
+      this.setData({ denied: true })
+    })
   },
 
   onShow() {
-    this.refresh()
+    if (this.data.ready) this.refresh()
+  },
+
+  onExitAdmin() {
+    wx.removeStorageSync('admin_ok')
+    wx.navigateBack({ delta: 1 })
   },
 
   onTab(e) {

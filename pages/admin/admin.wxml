@@ -1,4 +1,12 @@
 <view class="page">
+  <view class="denied" wx:if="{{denied}}">
+    <view class="denied-ico">🔒</view>
+    <view class="denied-t">没有访问权限</view>
+    <view class="denied-d">店主后台仅管理员可用。请用店主微信打开；本地演示模式需要输入管理密码。</view>
+    <view class="denied-btn" bindtap="onExitAdmin">返回</view>
+  </view>
+
+  <block wx:else>
   <view class="tabs">
     <view class="tab {{tab === 'orders' ? 'on' : ''}}" data-tab="orders" bindtap="onTab">订单</view>
     <view class="tab {{tab === 'goods' ? 'on' : ''}}" data-tab="goods" bindtap="onTab">商品</view>
@@ -33,23 +41,26 @@
     <view class="add-btn" bindtap="onAddProduct">＋ 新增商品</view>
 
     <view class="p" wx:for="{{products}}" wx:key="_id">
-      <view class="p-thumb" style="background:{{item.bg}}"><text class="p-emoji">{{item.emoji}}</text></view>
-      <view class="p-main">
-        <view class="p-name">{{item.name}}</view>
-        <view class="p-price">
-          ¥{{item.priceText}}
-          <text class="p-cat" wx:if="{{item.catName}}"> · {{item.catName}}</text>
-          <text class="p-off" wx:if="{{item.on === false}}"> 已下架</text>
+      <view class="p-top">
+        <view class="p-thumb" style="background:{{item.bg}}"><text class="p-emoji">{{item.emoji}}</text></view>
+        <view class="p-main">
+          <view class="p-name">{{item.name}}</view>
+          <view class="p-price">
+            ¥{{item.priceText}}
+            <text class="p-cat" wx:if="{{item.catName}}"> · {{item.catName}}</text>
+            <text class="p-off" wx:if="{{item.on === false}}"> 已下架</text>
+          </view>
         </view>
+        <switch checked="{{item.on !== false}}" color="#ff4d4f" data-id="{{item._id}}" bindchange="onToggle" />
       </view>
       <view class="p-ops">
-        <text class="op" data-id="{{item._id}}" bindtap="onEditProduct">编辑</text>
-        <text class="op del" data-id="{{item._id}}" bindtap="onDeleteProduct">删除</text>
+        <view class="op" data-id="{{item._id}}" bindtap="onEditProduct">编辑</view>
+        <view class="op del" data-id="{{item._id}}" bindtap="onDeleteProduct">删除</view>
       </view>
-      <switch checked="{{item.on !== false}}" color="#ff4d4f" data-id="{{item._id}}" bindchange="onToggle" />
     </view>
 
     <view class="empty" wx:if="{{!products.length}}">还没有商品，点上面「新增商品」</view>
+  </block>
   </block>
 
   <!-- 新增 / 编辑 弹层 -->

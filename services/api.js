@@ -115,6 +115,14 @@ function updateOrderStatus(id, status) {
   return Promise.resolve(true)
 }
 
+// 当前访问者身份：云模式返回 openid + 是否管理员；本地模式返回 local
+function whoami() {
+  if (cloudReady) {
+    return call('whoami').catch(() => ({ openid: '', isAdmin: false, local: false }))
+  }
+  return Promise.resolve({ openid: 'local', isAdmin: false, local: true })
+}
+
 function saveProduct(product) {
   if (cloudReady) return call('saveProduct', { product }).then(d => (d && d.product) || product)
   const p = Object.assign({}, product)
@@ -154,5 +162,5 @@ function deleteProduct(id) {
 
 module.exports = {
   init, isCloud, getCatalog, submitOrder, getMyOrders, listOrders,
-  updateOrderStatus, saveProduct, deleteProduct, fmtPrice, decorate
+  updateOrderStatus, saveProduct, deleteProduct, whoami, fmtPrice, decorate
 }

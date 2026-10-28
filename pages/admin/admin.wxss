@@ -101,12 +101,15 @@
 }
 
 .p {
-  display: flex;
-  align-items: center;
   margin-top: 16rpx;
-  padding: 16rpx 20rpx;
+  padding: 18rpx 20rpx 14rpx;
   background: #fff;
   border-radius: 16rpx;
+}
+
+.p-top {
+  display: flex;
+  align-items: center;
 }
 
 .p-thumb {
@@ -124,11 +127,15 @@
 
 .p-main {
   flex: 1;
+  min-width: 0;
   margin-left: 18rpx;
 }
 
 .p-name {
   font-size: 27rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .p-price {
@@ -159,17 +166,23 @@
 
 .p-ops {
   display: flex;
-  align-items: center;
-  margin-right: 10rpx;
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #f6f6f6;
 }
 
 .op {
-  padding: 8rpx 16rpx;
+  padding: 8rpx 26rpx;
+  border-radius: 999rpx;
+  background: #f5f5f5;
   font-size: 23rpx;
-  color: #2f8ffb;
+  color: #555;
 }
 
 .op.del {
+  background: #fff1f0;
   color: #ff3b30;
 }
 
@@ -315,4 +328,40 @@
   background: linear-gradient(135deg, #ff5b4f, #ff3b30);
   color: #fff;
   font-weight: 600;
+}
+
+/* ---------- 无权限 ---------- */
+.denied {
+  padding: 180rpx 60rpx;
+  text-align: center;
+}
+
+.denied-ico {
+  font-size: 80rpx;
+}
+
+.denied-t {
+  margin-top: 24rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.denied-d {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.7;
+}
+
+.denied-btn {
+  display: inline-block;
+  margin-top: 40rpx;
+  padding: 0 56rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  border-radius: 999rpx;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 27rpx;
 }
