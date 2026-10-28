@@ -108,3 +108,23 @@ wechat-shop/
 | 取货方式选项 | `pages/cart/cart.js` 的 `pickups` |
 | 提交成功文案 | `services/config.js` 的 `submitTip` |
 | 管理员 | `services/config.js` 的 `adminOpenids` + 云函数环境变量 `ADMIN_OPENIDS` |
+
+## 8. 开发约定（分支）
+
+| 分支 | 用途 |
+|------|------|
+| `main` | 稳定分支，只接受从 `dev` 合并的发布版本 |
+| `dev` | 日常开发分支，所有改动先提交到这里 |
+
+流程：
+
+```bash
+git checkout dev
+# ... 改代码 ...
+node scripts/validate-miniapp.js && node scripts/smoke-test.js
+git add -A && git commit -m "feat: xxx" && git push
+# 发布时
+git checkout main && git merge --no-ff dev && git push
+```
+
+提交信息前缀：`feat:` 新功能 / `fix:` 修复 / `docs:` 文档 / `chore:` 杂项。
