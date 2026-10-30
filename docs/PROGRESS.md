@@ -16,6 +16,7 @@
 - [x] 店铺资料弹层（电话拨号、地址复制、营业时间）
 - [x] 店主后台权限：openid 白名单 / 本地管理密码，非管理员拒绝访问
 - [x] 修复商品管理行右侧溢出（改为两行：信息 + 操作）
+- [x] 商品新增/编辑改为独立页面，修复弹层在部分机型右侧被裁切的问题；输入框加 `width:0;min-width:0` 约束
 - [x] 双模式数据层：本地 `storage` 演示 / 云开发真实下单
 - [x] 云函数 `shop`（catalog / seed / submitOrder / myOrders / listOrders / updateOrderStatus / saveProduct）
 - [x] 0 元商品支持（福利款、必选礼盒）

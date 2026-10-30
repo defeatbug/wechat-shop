@@ -4,7 +4,8 @@
     "pages/search/search",
     "pages/cart/cart",
     "pages/orders/orders",
-    "pages/admin/admin"
+    "pages/admin/admin",
+    "pages/product-edit/product-edit"
   ],
   "window": {
     "navigationBarTitleText": "选款下单",

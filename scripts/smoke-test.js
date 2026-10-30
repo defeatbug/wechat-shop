@@ -20,6 +20,7 @@ global.wx = {
   makePhoneCall: o => console.log('   [call]', o.phoneNumber),
   setClipboardData: o => console.log('   [clipboard]', o.data),
   navigateBack: o => console.log('   [back]', JSON.stringify(o || {})),
+  setNavigationBarTitle: o => console.log('   [title]', o.title),
   createSelectorQuery: () => {
     const q = {
       in: () => q,
@@ -137,25 +138,33 @@ function check(name, cond, extra) {
   await tick(50)
   check('下架后首页不再出现该商品', !idx2.data.groups.some(g => g.products.some(p => p._id === 'p_nail')))
 
-  console.log('=== 7. 商品新增 / 编辑 / 删除 ===')
-  admin.onAddProduct()
-  check('打开新增弹层', admin.data.editing === true)
-  admin.onField({ currentTarget: { dataset: { k: 'name' } }, detail: { value: '测试耳夹' } })
-  admin.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '19.9' } })
-  admin.onField({ currentTarget: { dataset: { k: 'desc' } }, detail: { value: '测试用' } })
-  admin.onField({ currentTarget: { dataset: { k: 'emoji' } }, detail: { value: '📎' } })
-  admin.onCatChange({ detail: { value: 3 } })
-  admin.onSaveProduct()
+  console.log('=== 7. 商品新增 / 编辑 / 删除（独立页面）===')
+  const pe = loadPage('pages/product-edit/product-edit.js')
+  pe.onLoad({})
+  await tick(60)
+  check('新增页载入分类', pe.data.cats.length === 10, pe.data.cats.length)
+  pe.onField({ currentTarget: { dataset: { k: 'name' } }, detail: { value: '测试耳夹' } })
+  pe.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '19.9' } })
+  pe.onField({ currentTarget: { dataset: { k: 'desc' } }, detail: { value: '测试用' } })
+  pe.onField({ currentTarget: { dataset: { k: 'emoji' } }, detail: { value: '📎' } })
+  pe.onCatChange({ detail: { value: 3 } })
+  pe.onSave()
+  await tick(80)
+  admin.loadProducts()
   await tick(60)
   check('新增后商品 23 条', admin.data.products.length === 23, admin.data.products.length)
   const added = admin.data.products.filter(p => p.name === '测试耳夹')[0]
   check('新商品价格 19.90', added && added.priceText === '19.90', added && added.priceText)
   check('新商品落在所选分类', added && added.catId === admin.data.cats[3].id, added && added.catId)
 
-  admin.onEditProduct({ currentTarget: { dataset: { id: added._id } } })
-  check('编辑弹层带出原值', admin.data.form.name === '测试耳夹')
-  admin.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '29' } })
-  admin.onSaveProduct()
+  const pe2 = loadPage('pages/product-edit/product-edit.js')
+  pe2.onLoad({ id: added._id })
+  await tick(60)
+  check('编辑页带出原值', pe2.data.form.name === '测试耳夹')
+  pe2.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '29' } })
+  pe2.onSave()
+  await tick(80)
+  admin.loadProducts()
   await tick(60)
   const edited = admin.data.products.filter(p => p._id === added._id)[0]
   check('改价后 29.00', edited && edited.priceText === '29.00', edited && edited.priceText)
