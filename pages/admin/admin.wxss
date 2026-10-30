@@ -16,6 +16,21 @@
   padding-bottom: 12rpx;
 }
 
+.tab-badge {
+  display: inline-block;
+  min-width: 30rpx;
+  height: 30rpx;
+  margin-left: 8rpx;
+  padding: 0 8rpx;
+  border-radius: 999rpx;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 19rpx;
+  line-height: 30rpx;
+  text-align: center;
+  vertical-align: middle;
+}
+
 .tab.on {
   color: #111;
   font-weight: 600;

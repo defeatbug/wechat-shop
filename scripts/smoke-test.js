@@ -124,6 +124,7 @@ function check(name, cond, extra) {
   admin.onShow()
   await tick(50)
   check('后台能看到订单', admin.data.orders.length === 1)
+  check('待确认红点为 1', admin.data.pendingCount === 1, admin.data.pendingCount)
   admin.onAdvance({ currentTarget: { dataset: { id: admin.data.orders[0]._id } } })
   await tick(50)
   check('订单状态推进到已确认', admin.data.orders[0].status === 'confirmed', admin.data.orders[0].status)

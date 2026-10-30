@@ -12,7 +12,9 @@
 
   <block wx:else>
   <view class="tabs">
-    <view class="tab {{tab === 'orders' ? 'on' : ''}}" data-tab="orders" bindtap="onTab">订单</view>
+    <view class="tab {{tab === 'orders' ? 'on' : ''}}" data-tab="orders" bindtap="onTab">
+      订单<text class="tab-badge" wx:if="{{pendingCount > 0}}">{{pendingCount}}</text>
+    </view>
     <view class="tab {{tab === 'goods' ? 'on' : ''}}" data-tab="goods" bindtap="onTab">商品</view>
   </view>
 

@@ -17,7 +17,8 @@ Page({
     catNames: [],
     ready: false,
     denied: false,
-    myOpenid: ''
+    myOpenid: '',
+    pendingCount: 0
   },
 
   onLoad() {
@@ -40,6 +41,11 @@ Page({
 
   onShow() {
     if (this.data.ready) this.refresh()
+  },
+
+  onPullDownRefresh() {
+    this.refresh()
+    setTimeout(() => wx.stopPullDownRefresh(), 500)
   },
 
   onCopyOpenid() {
@@ -72,7 +78,10 @@ Page({
           summary
         })
       })
-      this.setData({ orders })
+      this.setData({
+        orders,
+        pendingCount: orders.filter(o => o.status === 'pending').length
+      })
     })
   },
 

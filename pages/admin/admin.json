@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "店主后台"
+  "navigationBarTitleText": "店主后台",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
 }
