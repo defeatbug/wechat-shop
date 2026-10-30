@@ -8,7 +8,8 @@ Page({
     activeCat: '',
     anchor: '',
     count: 0,
-    totalText: '0.00'
+    totalText: '0.00',
+    shopOpen: false
   },
 
   onLoad() {
@@ -119,6 +120,31 @@ Page({
     try {
       wx.vibrateShort({ type: 'light' })
     } catch (err) {}
+  },
+
+  // ---------- 店铺资料 ----------
+  onShopInfo() {
+    this.setData({ shopOpen: true })
+  },
+
+  closeShopInfo() {
+    this.setData({ shopOpen: false })
+  },
+
+  onCall() {
+    const phone = this.data.shop.phone
+    if (!phone) return
+    wx.makePhoneCall({ phoneNumber: phone })
+  },
+
+  onCopyAddr() {
+    const addr = this.data.shop.address
+    if (!addr) return
+    wx.setClipboardData({ data: addr })
+  },
+
+  goSearch() {
+    wx.navigateTo({ url: '/pages/search/search' })
   },
 
   goCart() {

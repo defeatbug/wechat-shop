@@ -40,7 +40,12 @@ const products = [
 
 const shop = {
   name: '喜欢温柔',
-  notice: '选好款提交即可，免配送费；提交后店主会联系你确认，线下付款。'
+  avatar: '🐻',
+  notice: '选好款提交即可，免配送费；提交后店主会联系你确认，线下付款。',
+  phone: '13800000000',
+  address: '示例地址：XX市XX区XX路XX号（请改成你的店）',
+  hours: '每天 10:00 - 21:30',
+  wechat: '微信同号，可私信'
 }
 
 module.exports = { categories, products, shop }

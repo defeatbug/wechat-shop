@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="bar">
+    <view class="input-wrap">
+      <text class="ico">🔍</text>
+      <input
+        class="input"
+        focus="{{focus}}"
+        placeholder="商品名称"
+        placeholder-class="ph"
+        value="{{kw}}"
+        bindinput="onInput"
+        confirm-type="search"
+      />
+      <text class="clear" wx:if="{{kw}}" bindtap="onClear">✕</text>
+    </view>
+    <text class="cancel" bindtap="onCancel">取消</text>
+  </view>
+
+  <view class="hint" wx:if="{{!kw}}">输入关键词搜索，比如「珍珠」「项链」「发饰」</view>
+
+  <view class="list" wx:if="{{results.length}}">
+    <view class="card" wx:for="{{results}}" wx:key="_id">
+      <view class="thumb" style="background:{{item.bg}}">
+        <text class="thumb-emoji">{{item.emoji}}</text>
+      </view>
+      <view class="info">
+        <view class="name">{{item.name}}</view>
+        <view class="desc">{{item.desc}}</view>
+        <view class="row">
+          <view class="price">
+            <text class="sym">¥</text>
+            <text class="num">{{item.priceText}}</text>
+          </view>
+          <view class="plus" catchtap="onAdd" data-id="{{item._id}}">＋</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{kw && !results.length}}">没有找到「{{kw}}」相关商品</view>
+</view>

@@ -11,12 +11,15 @@ global.wx = {
   showToast: o => console.log('   [toast]', o.title),
   showModal: o => {
     console.log('   [modal]', o.title, '|', o.content)
-    if (o.success) o.success()
+    if (o.success) o.success({ confirm: true, cancel: false })
   },
   navigateTo: o => console.log('   [navigate]', o.url),
   redirectTo: o => console.log('   [redirect]', o.url),
   reLaunch: o => console.log('   [relaunch]', o.url),
   vibrateShort: () => {},
+  makePhoneCall: o => console.log('   [call]', o.phoneNumber),
+  setClipboardData: o => console.log('   [clipboard]', o.data),
+  navigateBack: o => console.log('   [back]', JSON.stringify(o || {})),
   createSelectorQuery: () => {
     const q = {
       in: () => q,
@@ -108,10 +111,13 @@ function check(name, cond, extra) {
   const op = loadPage('pages/orders/orders.js')
   op.onShow()
   await tick(50)
+  await tick(30)
   check('订单列表 1 条', op.data.orders.length === 1, op.data.orders.length)
+  check('本地模式显示店主入口', op.data.showAdminEntry === true)
   check('状态文案正确', op.data.orders[0].statusText === '待确认', op.data.orders[0].statusText)
 
   console.log('=== 5. 店主后台 ===')
+  mem['admin_ok'] = 1 // 本地演示模式：先通过管理密码
   const admin = loadPage('pages/admin/admin.js')
   admin.onLoad()
   admin.onShow()
@@ -130,6 +136,83 @@ function check(name, cond, extra) {
   idx2.onLoad()
   await tick(50)
   check('下架后首页不再出现该商品', !idx2.data.groups.some(g => g.products.some(p => p._id === 'p_nail')))
+
+  console.log('=== 7. 商品新增 / 编辑 / 删除 ===')
+  admin.onAddProduct()
+  check('打开新增弹层', admin.data.editing === true)
+  admin.onField({ currentTarget: { dataset: { k: 'name' } }, detail: { value: '测试耳夹' } })
+  admin.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '19.9' } })
+  admin.onField({ currentTarget: { dataset: { k: 'desc' } }, detail: { value: '测试用' } })
+  admin.onField({ currentTarget: { dataset: { k: 'emoji' } }, detail: { value: '📎' } })
+  admin.onCatChange({ detail: { value: 3 } })
+  admin.onSaveProduct()
+  await tick(60)
+  check('新增后商品 23 条', admin.data.products.length === 23, admin.data.products.length)
+  const added = admin.data.products.filter(p => p.name === '测试耳夹')[0]
+  check('新商品价格 19.90', added && added.priceText === '19.90', added && added.priceText)
+  check('新商品落在所选分类', added && added.catId === admin.data.cats[3].id, added && added.catId)
+
+  admin.onEditProduct({ currentTarget: { dataset: { id: added._id } } })
+  check('编辑弹层带出原值', admin.data.form.name === '测试耳夹')
+  admin.onField({ currentTarget: { dataset: { k: 'priceYuan' } }, detail: { value: '29' } })
+  admin.onSaveProduct()
+  await tick(60)
+  const edited = admin.data.products.filter(p => p._id === added._id)[0]
+  check('改价后 29.00', edited && edited.priceText === '29.00', edited && edited.priceText)
+
+  admin.onDeleteProduct({ currentTarget: { dataset: { id: added._id } } })
+  await tick(60)
+  check('删除后回到 22 条', admin.data.products.length === 22, admin.data.products.length)
+
+  const idx3 = loadPage('pages/index/index.js')
+  idx3.onLoad()
+  await tick(50)
+  check('首页不出现已删除商品', !idx3.data.groups.some(g => g.products.some(p => p.name === '测试耳夹')))
+
+  console.log('=== 8. 店铺资料弹层 ===')
+  const idx4 = loadPage('pages/index/index.js')
+  idx4.onLoad()
+  await tick(50)
+  check('店铺信息带电话/地址', idx4.data.shop.phone === '13800000000' && !!idx4.data.shop.address)
+  idx4.onShopInfo()
+  check('点店名打开资料弹层', idx4.data.shopOpen === true)
+  idx4.onCall()
+  idx4.onCopyAddr()
+  idx4.closeShopInfo()
+  check('关闭资料弹层', idx4.data.shopOpen === false)
+
+  console.log('=== 9. 搜索商品 ===')
+  const sp = loadPage('pages/search/search.js')
+  sp.onLoad()
+  await tick(50)
+  // 前面第 6 节把 p_nail 下架了，所以这里只应有 21 款在售
+  check('搜索页只拿在售商品', sp.data.products.length === 21 && sp.data.products.every(p => p.on !== false), sp.data.products.length)
+  sp.onInput({ detail: { value: '珍珠' } })
+  check('搜「珍珠」有结果', sp.data.results.length >= 2, sp.data.results.length)
+  check('结果名含关键词', sp.data.results.every(p => p.name.indexOf('珍珠') >= 0 || (p.desc || '').indexOf('珍珠') >= 0))
+  sp.onInput({ detail: { value: '不存在的款' } })
+  check('无结果时为空', sp.data.results.length === 0)
+  sp.onClear()
+  check('清空关键词', sp.data.kw === '' && sp.data.results.length === 0)
+  sp.onInput({ detail: { value: '耳' } })
+  const first = sp.data.results[0]
+  sp.onAdd({ currentTarget: { dataset: { id: first._id } } })
+  const cartNow = mem['shop_cart_v1'] || {}
+  check('搜索结果可直接加购', cartNow[first._id] === 1, cartNow)
+
+  console.log('=== 10. 后台权限 ===')
+  delete mem['admin_ok']
+  const admin2 = loadPage('pages/admin/admin.js')
+  admin2.onLoad()
+  await tick(50)
+  check('未通过密码时后台被拒', admin2.data.denied === true)
+  check('被拒时不加载订单', admin2.data.orders.length === 0)
+
+  mem['admin_ok'] = 1
+  const admin3 = loadPage('pages/admin/admin.js')
+  admin3.onLoad()
+  await tick(50)
+  check('通过密码后可进入', admin3.data.ready === true && admin3.data.denied === false)
 
   console.log(failed ? `\n❌ ${failed} 项失败` : '\n✅ 全部通过')
   process.exit(failed ? 1 : 0)

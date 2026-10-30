@@ -2,6 +2,8 @@
 const CART_KEY = 'shop_cart_v1'
 const ORDER_KEY = 'shop_orders_v1'
 const PROD_OVERRIDE_KEY = 'shop_product_overrides_v1'
+const CUSTOM_PRODUCT_KEY = 'shop_custom_products_v1'
+const DELETED_PRODUCT_KEY = 'shop_deleted_products_v1'
 
 function read(key, def) {
   try {
@@ -68,9 +70,27 @@ function updateLocalOrder(id, patch) {
   return list
 }
 
-// 演示模式下，店主对商品的改动（上架/价格）存在本地
+// 演示模式下的商品管理：覆盖（改）/ 新增 / 删除 三份本地数据
 function getProductOverrides() {
   return read(PROD_OVERRIDE_KEY, {})
+}
+
+function getCustomProducts() {
+  return read(CUSTOM_PRODUCT_KEY, [])
+}
+
+function setCustomProducts(list) {
+  write(CUSTOM_PRODUCT_KEY, list)
+  return list
+}
+
+function getDeletedProducts() {
+  return read(DELETED_PRODUCT_KEY, [])
+}
+
+function setDeletedProducts(list) {
+  write(DELETED_PRODUCT_KEY, list)
+  return list
 }
 
 function setProductOverride(id, patch) {
@@ -83,5 +103,6 @@ function setProductOverride(id, patch) {
 module.exports = {
   getCart, setCart, addToCart, setQty, clearCart, cartCount,
   getLocalOrders, addLocalOrder, updateLocalOrder,
-  getProductOverrides, setProductOverride
+  getProductOverrides, setProductOverride,
+  getCustomProducts, setCustomProducts, getDeletedProducts, setDeletedProducts
 }
